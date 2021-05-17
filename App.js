@@ -6,6 +6,7 @@
  * @flow strict-local
  */
 
+import Slider from '@react-native-community/slider';
 import React from 'react';
 import {
     Button,
@@ -35,22 +36,24 @@ function App() {
         initSoundPlayer(listSoundFileNames[currentFileIndex]);
     }, [currentFileIndex]);
 
-    const [currentPlayer, setCurrentPlayer] = React.useState(new SoundPlayer('', SoundPlayer.MAIN_BUNDLE, (error) => {
-
-    }));
+    const [currentPlayer, setCurrentPlayer] = React.useState(new SoundPlayer(''));
     function initSoundPlayer(audioName = '') {
         if (!audioName) {
             return;
         }
 
+        currentPlayer?.release();
         SoundPlayer.setCategory('Playback');
-        setCurrentPlayer(new SoundPlayer(listSoundFileNames[currentFileIndex], SoundPlayer.MAIN_BUNDLE, (error) => {
+        let player = new SoundPlayer(listSoundFileNames[currentFileIndex], SoundPlayer.MAIN_BUNDLE, (error) => {
             if (error) {
                 setAudioStatus(statuses.error);
             } else {
                 setAudioStatus(statuses.success);
             }
-        }));
+            player?.setSpeed(1.5);
+            setDuration(player.getDuration());
+        });
+        setCurrentPlayer(player);
     }
 
     const [audioStatus, setAudioStatus] = React.useState(statuses.loading);
@@ -90,34 +93,63 @@ function App() {
         }
     }, [audioStatus]);
 
-    const [currentTimeStr, setCurrentTimeStr] = React.useState('');
+    const [currentTime, setCurrentTime] = React.useState(0);
     let tickInterval = null;
     function play() {
-        if (!tickInterval) {
-            tickInterval = setInterval(() => {
-                currentPlayer?.getCurrentTime((seconds, isPlaying) => {
-                    if (isPlaying === true) {
-                        setCurrentTimeStr(new Date(seconds * 1000).toISOString().substr(11, 8));
-                    }
-                });
-            }, 250);
+        if (tickInterval) {
+            clearInterval(tickInterval);
         }
-        currentPlayer.play();
+
+        tickInterval = setInterval(() => {
+            currentPlayer?.getCurrentTime((seconds, isPlaying) => {
+                if (isPlaying === true) {
+                    setCurrentTime(seconds);
+                }
+            });
+        }, 250);
+        currentPlayer.play((isEnd) => {
+            if (isEnd === true) {
+                setAudioStatus(statuses.pause);
+                setCurrentTime(duration);
+            }
+        });
     }
 
+    function getCurrentTime() {
+        if (currentPlayer) {
+            return new Date(currentTime * 1000).toISOString().substr(11, 8);
+        }
+
+        return new Date(0).toISOString().substr(11, 8);
+    }
+
+    const [duration, setDuration] = React.useState(0); // seconds
     function getDuration() {
         if (currentPlayer) {
-            return new Date(currentPlayer.getDuration() * 1000).toISOString().substr(11, 8);
+            return new Date(duration * 1000).toISOString().substr(11, 8);
         }
 
         return '';
     }
 
     return (
-        <View>
+        <View style={styles.container}>
             <Text>Name: {listSoundFileNames[currentFileIndex]}</Text>
-            <Text>Duration: {getDuration()}</Text>
-            <Text>Current time: {currentTimeStr}</Text>
+            <View style={styles.duration}>
+                <Text style={styles.durationText}>{getCurrentTime()}</Text>
+                <Slider
+                    style={{width: '70%', height: 40}}
+                    minimumValue={0}
+                    maximumValue={duration}
+                    value={currentTime}
+                    minimumTrackTintColor="#FFFFFF"
+                    maximumTrackTintColor="#000000"
+                    onTouchStart={() => setAudioStatus(statuses.pause)}
+                    onTouchEnd={() => setAudioStatus(statuses.play)}
+                    onValueChange={(seconds) => currentPlayer?.setCurrentTime(seconds)}
+                />
+                <Text style={styles.durationText}>{getDuration()}</Text>
+            </View>
             <Button title='Play' onPress={() => setAudioStatus(statuses.play)} disabled={audioStatus === statuses.play || audioStatus === statuses.loading}/>
             <Button title='Pause' onPress={() => setAudioStatus(statuses.pause)} disabled={audioStatus === statuses.pause || audioStatus === statuses.stop || audioStatus === statuses.loading}/>
             <Button title='Stop' onPress={() => setAudioStatus(statuses.stop)} disabled={audioStatus === statuses.stop || audioStatus === statuses.loading}/>
@@ -128,6 +160,19 @@ function App() {
 };
 
 const styles = StyleSheet.create({
+    container: {
+        backgroundColor: 'black',
+        flex: 1,
+    },
+    duration: {
+        width: '100%',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    durationText: {
+        color: 'white',
+    }
 });
 
 export default App;
