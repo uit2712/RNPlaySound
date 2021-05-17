@@ -146,7 +146,7 @@ function App() {
                     maximumTrackTintColor="#000000"
                     onTouchStart={() => setAudioStatus(statuses.pause)}
                     onTouchEnd={() => setAudioStatus(statuses.play)}
-                    onValueChange={(seconds) => currentPlayer?.setCurrentTime(seconds)}
+                    onSlidingComplete={(seconds) => currentPlayer?.setCurrentTime(seconds)}
                 />
                 <Text style={styles.durationText}>{getDuration()}</Text>
             </View>
