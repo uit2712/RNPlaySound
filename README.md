@@ -12,7 +12,7 @@ react-native link react-native-sound
 ```
 # Usage
 ## Android
-### Play sound in /android/app/src/main/res/raw folder
+### Load sound from the app bundle
 -Copy your audio files into folder __/android/app/src/main/res/raw__ (if not exists, create it). Notice that your audio's name in __raw__ should be like this: File-based resource names must contain only lowercase a-z, 0-9, or underscore or you will face this error in the future
-### Play sound online
-### Play sound in project folder
+### Load sound from the network
+### Load sound from other directories
