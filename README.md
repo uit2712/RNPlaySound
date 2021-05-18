@@ -1,4 +1,12 @@
 # React native sound
+# Table of content
+- [Library and installation](#library-and-installation)
+- [Heading](#heading-1)
+  * [Sub-heading](#sub-heading-1)
+    + [Sub-sub-heading](#sub-sub-heading-1)
+- [Heading](#heading-2)
+  * [Sub-heading](#sub-heading-2)
+    + [Sub-sub-heading](#sub-sub-heading-2)
 # Library and installation
 - React native sound: https://www.npmjs.com/package/react-native-sound
 ```
@@ -16,13 +24,12 @@ react-native link react-native-vector-icons
 ```
 - React native vector icons directory (search icon name you want to use): https://oblador.github.io/react-native-vector-icons/
 # Usage
-## Android
-### Load sound from the app bundle
+## Load sound from the app bundle
 - Copy your audio files into folder __/android/app/src/main/res/raw__ (if not exists, create it)
 - Notice that your audio's name in folder __raw__ should be like this: _File-based resource names must contain only lowercase a-z, 0-9, or underscore_ or you will face this error when run app
-### Load sound from the network
+## Load sound from the network
 - Same as __Load sound from the app bundle__
-### Load sound from other directories
+## Load sound from other directories
 - Instead of use __path__ like previous 2 types before, we use like this:
 ```javascript
 path: require('./sounds/Play-Doh-meets-Dora_Carmen-Maria-and-Edu-Espinal.mp3')
