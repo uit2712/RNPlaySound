@@ -65,8 +65,7 @@ export function useAudioHelper(request: IUseAudioHelper) {
 
     function playComplete(isEnd: boolean) {
         if (isEnd === true) {
-            setStatus('pause');
-            setCurrentTime(0);
+            next();
         }
     }
 

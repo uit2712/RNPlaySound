@@ -17,7 +17,6 @@ import {
     View,
 } from 'react-native';
 import SoundPlayer from 'react-native-sound';
-import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import { useAudioHelper } from './helpers/audio-helper';
 
@@ -43,9 +42,25 @@ function App() {
     return (
         <View style={styles.container}>
             <Text style={styles.name}>Name: {player.currentAudioName}</Text>
-            <Image source={require('./images/nezuko.png')} style={styles.avatar}/>
+            <View style={styles.changeAudio}>
+                <TouchableOpacity onPress={player.previous}>
+                    <FontAwesomeIcon
+                        name='step-backward'
+                        size={50}
+                        color={player.isDisabledButtonPrevious === false ? 'white' : 'gray'}
+                    />
+                </TouchableOpacity>
+                <Image source={require('./images/nezuko.png')} style={styles.avatar}/>
+                <TouchableOpacity onPress={player.next} style={styles.button}>
+                    <FontAwesomeIcon
+                        name='step-forward'
+                        size={50}
+                        color={player.isDisabledButtonNext === false ? 'white' : 'gray'}
+                    />
+                </TouchableOpacity>
+            </View>
             <View style={styles.actionButtonsOther}>
-                <TouchableOpacity onPress={player.decreaseTime} style={{justifyContent:'center'}}>
+                <TouchableOpacity onPress={player.decreaseTime} style={styles.button}>
                     <FontAwesomeIcon
                         name='rotate-left'
                         size={50}
@@ -54,17 +69,14 @@ function App() {
                     <Text style={{position:'absolute', alignSelf:'center', marginTop:1, color:'white', fontSize:12 }}>{player.timeRate}</Text>
                 </TouchableOpacity>
                 {
-                    player.status === 'play' &&
+                    player.status === 'play' ?
                         <TouchableOpacity onPress={player.pause} style={{marginHorizontal:20}}>
                             <FontAwesomeIcon
                                 name='pause'
                                 color='white'
                                 size={50}
                             />
-                        </TouchableOpacity>
-                }
-                {
-                    player.status === 'pause' &&
+                        </TouchableOpacity> :
                         <TouchableOpacity onPress={player.play} style={{marginHorizontal:20}}>
                             <FontAwesomeIcon
                                 name='play'
@@ -73,7 +85,7 @@ function App() {
                             />
                         </TouchableOpacity>
                 }
-                <TouchableOpacity onPress={player.increaseTime} style={{justifyContent:'center'}}>
+                <TouchableOpacity onPress={player.increaseTime} style={styles.button}>
                     <FontAwesomeIcon
                         name='rotate-right'
                         size={50}
@@ -107,16 +119,6 @@ function App() {
                     ))
                 }
             </View>
-            <Button
-                title='Next'
-                onPress={() => player.next()}
-                disabled={player.isDisabledButtonNext}
-            />
-            <Button
-                title='Previous'
-                onPress={() => player.previous()}
-                disabled={player.isDisabledButtonPrevious}
-            />
         </View>
     );
 };
@@ -133,9 +135,9 @@ const styles = StyleSheet.create({
     avatar: {
         width:200,
         height:200,
-        marginBottom:15,
         alignSelf:'center',
         borderRadius: 100,
+        margin: 15,
     },
     progressBar: {
         flexDirection: 'row',
@@ -177,6 +179,14 @@ const styles = StyleSheet.create({
     },
     actionButtonsOtherTimeUp: {
         // width: 40,
+    },
+    changeAudio: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent:'center',
+    },
+    button: {
+        justifyContent: 'center',
     }
 });
 
