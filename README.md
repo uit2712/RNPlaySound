@@ -61,7 +61,7 @@ if (currentAudio.isRequired === true) {
 }
 ...
 ```
-- Notice that your audio's name in this case should be like this: _File-based resource names must contain only lowercase a-z, 0-9, or underscore_ or you will face this error when run app
+- Notice that your audio's name in this case should be like this: _File-based resource names must not contain space character or any special characters_ or you will face this error when run app
 # Steps
 ## Step 1: Install all necessary libraries
 ## Step 2: Create audio-helper
