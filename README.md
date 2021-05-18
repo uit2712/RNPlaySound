@@ -93,9 +93,6 @@ Hook __useAudioHelper__ has all methods, values we need like: play, pause, curre
 const [listSounds, setListSounds] = React.useState(request.listSounds);
 const [timeRate, setTimeRate] = React.useState(request.timeRate || 15);
 const [status, setStatus] = React.useState<AudioStatusType>('loading');
-const [index, setIndex] = React.useState(0);
-const [currentTime, setCurrentTime] = React.useState(0);
-const [duration, setDuration] = React.useState(0);
 ```
 #### Initialize sound player:
 ```javascript
