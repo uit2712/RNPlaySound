@@ -23,6 +23,7 @@
       + [Decrease time](#decrease-time)
       + [Other functions](#other-functions)
       + [Return necessary functions, variables](#return-necessary-functions-variables)
+  * [Step 3: Apply hook useAudioHelper](#step-3-apply-hook-useaudiohelper)
 - [References](#references)
   * [React native sound](#react-native-sound-1)
   * [React native sound demo](#react-native-sound-demo)
