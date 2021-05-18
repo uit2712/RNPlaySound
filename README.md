@@ -287,6 +287,9 @@ function isDisabledButtonPrevious() {
 }
 ```
 # Reference
-- React native sound: https://www.npmjs.com/package/react-native-sound
-- React native sound demo: https://github.com/zmxv/react-native-sound-demo
-- React native sound player preview: https://github.com/benevbright/react-native-sound-playerview
+## React native sound
+Link: https://www.npmjs.com/package/react-native-sound
+## React native sound demo
+Link: https://github.com/zmxv/react-native-sound-demo
+## React native sound player preview
+Link: https://github.com/benevbright/react-native-sound-playerview
