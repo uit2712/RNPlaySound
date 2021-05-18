@@ -19,7 +19,7 @@ react-native link react-native-vector-icons
 ## Android
 ### Load sound from the app bundle
 - Copy your audio files into folder __/android/app/src/main/res/raw__ (if not exists, create it)
-- Notice that your audio's name in __raw__ should be like this: _File-based resource names must contain only lowercase a-z, 0-9, or underscore_ or you will face this error in the future
+- Notice that your audio's name in folder __raw__ should be like this: _File-based resource names must contain only lowercase a-z, 0-9, or underscore_ or you will face this error when run app
 ### Load sound from the network
 - Same as __Load sound from the app bundle__
 ### Load sound from other directories
@@ -35,6 +35,7 @@ if (currentAudio.isRequired === true) {
 }
 ...
 ```
+- Notice that your audio's name in this case should be like this: _File-based resource names must contain only lowercase a-z, 0-9, or underscore_ or you will face this error when run app
 # Reference
 - React native sound: https://www.npmjs.com/package/react-native-sound
 - React native sound demo: https://github.com/zmxv/react-native-sound-demo
