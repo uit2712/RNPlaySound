@@ -8,7 +8,7 @@ interface ISoundFile {
     isRequired?: boolean;
 }
 
-export type AudioStatusType = 'loading' | 'success' | 'error' | 'play' | 'pause' | 'next' | 'previous' | 'stop';
+type AudioStatusType = 'loading' | 'success' | 'error' | 'play' | 'pause' | 'next' | 'previous' | 'stop';
 
 interface IUseAudioHelper {
     listSounds: ISoundFile[];
