@@ -287,6 +287,33 @@ function isDisabledButtonPrevious() {
     return status === 'loading' || index === 0;
 }
 ```
+#### Return necessary functions, variables
+```javascript
+return {
+    status,
+    duration,
+    currentTime,
+    play,
+    pause,
+    stop,
+    next,
+    previous,
+    increaseTime,
+    decreaseTime,
+    durationString: getDurationString(),
+    currentTimeString: getCurrentTimeString(),
+    currentAudioName: getCurrentAudioName(),
+    isDisabledButtonPlay: isDisabledButtonPlay(),
+    isDisabledButtonPause: isDisabledButtonPause(),
+    isDisabledButtonStop: isDisabledButtonStop(),
+    isDisabledButtonNext: isDisabledButtonNext(),
+    isDisabledButtonPrevious: isDisabledButtonPrevious(),
+    seekToTime,
+    timeRate,
+    speed,
+    setSpeed,
+}
+```
 # References
 ## React native sound
 Link: https://www.npmjs.com/package/react-native-sound
