@@ -2,8 +2,10 @@ import SoundPlayer from 'react-native-sound';
 import React from 'react';
 
 interface ISoundFile {
-    path: string;
-    mainBundle: string;
+    path: string | NodeRequire;
+    basePath?: string;
+    name: string;
+    isRequired?: boolean;
 }
 
 export type AudioStatusType = 'loading' | 'success' | 'error' | 'play' | 'pause' | 'next' | 'previous' | 'stop';
@@ -47,16 +49,27 @@ export function useAudioHelper(request: IUseAudioHelper) {
             if (player) {
                 player.release();
             }
-            const newPlayer = new SoundPlayer(listSounds[index].path, listSounds[index].mainBundle, (error) => {
+
+            const callback = (error, player: SoundPlayer) => {
                 if (error) {
                     setStatus('error');
                 } else {
                     setStatus('success');
                 }
-                setDuration(newPlayer.getDuration());
-                playWithPlayer(newPlayer);
-            });
-            setPlayer(newPlayer);
+                player.setSpeed(speed);
+                setDuration(player.getDuration());
+                playWithPlayer(player);
+            }
+
+            const currentAudio = listSounds[index];
+            // If the audio is a 'require' then the second parameter must be the callback.
+            if (currentAudio.isRequired === true) {
+                const newPlayer = new SoundPlayer(currentAudio.path, (error) => callback(error, newPlayer));
+                setPlayer(newPlayer);
+            } else {
+                const newPlayer = new SoundPlayer(currentAudio.path, currentAudio.basePath, (error) => callback(error, newPlayer));
+                setPlayer(newPlayer);
+            }
         }
     }
     React.useEffect(() => {
@@ -100,6 +113,7 @@ export function useAudioHelper(request: IUseAudioHelper) {
     function next() {
         if (player && index < listSounds.length - 1) {
             player.release();
+            setCurrentTime(0);
             setStatus('next');
             setIndex(index + 1);
         }
@@ -108,6 +122,7 @@ export function useAudioHelper(request: IUseAudioHelper) {
     function previous() {
         if (player && index > 0) {
             player.release();
+            setCurrentTime(0);
             setStatus('previous');
             setIndex(index - 1);
         }
@@ -161,7 +176,7 @@ export function useAudioHelper(request: IUseAudioHelper) {
     }
 
     function getCurrentAudioName() {
-        return listSounds[index].path;
+        return listSounds[index].name;
     }
 
     function isDisabledButtonPlay() {

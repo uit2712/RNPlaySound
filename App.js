@@ -33,8 +33,10 @@ const listSpeedValues = [
 function App() {
     const player = useAudioHelper({
         listSounds: [
-            { path: 'blue_dream_cheel.mp3', mainBundle: SoundPlayer.MAIN_BUNDLE },
-            { path: 'know_myself_patrick_patrikios.mp3', mainBundle: SoundPlayer.MAIN_BUNDLE },
+            { path: 'blue_dream_cheel.mp3', name: 'Blue Dream - Cheel', basePath: SoundPlayer.MAIN_BUNDLE },
+            { path: 'know_myself_patrick_patrikios.mp3', name: 'Know Myself - Patrick Patrikios', basePath: SoundPlayer.MAIN_BUNDLE },
+            { path: require('./sounds/Play-Doh-meets-Dora_Carmen-Maria-and-Edu-Espinal.mp3'), name: 'Play Doh meets Dora - Carmen Maria and Edu Espinal', isRequired: true, },
+            { path: 'https://raw.githubusercontent.com/uit2712/RNPlaySound/develop/sounds/Tropic%20-%20Anno%20Domini%20Beats.mp3', name: 'Tropic - Anno Domini Beats', },
         ],
         timeRate: 15,
     });
@@ -113,8 +115,14 @@ function App() {
             <View style={styles.speed}>
                 {
                     listSpeedValues.map((item, index) => (
-                        <TouchableOpacity key={index} style={styles.speedItem} onPress={() => player.setSpeed(item.value)}>
-                            <Text style={styles.speedItemText}>{item.text}</Text>
+                        <TouchableOpacity
+                            key={index}
+                            style={styles.speedItem}
+                            onPress={() => player.setSpeed(item.value)}
+                        >
+                            <Text style={{
+                                color: player.speed === item.value ? '#3399ff' : 'white'
+                            }}>{item.text}</Text>
                         </TouchableOpacity>
                     ))
                 }
@@ -157,9 +165,6 @@ const styles = StyleSheet.create({
     },
     speedItem: {
         width: 50,
-    },
-    speedItemText: {
-        color: 'white',
     },
     actionButtons: {
         
