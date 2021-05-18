@@ -1,5 +1,5 @@
 # React native sound
-# Library and install
+# Library and installation
 - React native sound: https://www.npmjs.com/package/react-native-sound
 ```
 npm install react-native-sound --save
