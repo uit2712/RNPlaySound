@@ -10,6 +10,7 @@ import Slider from '@react-native-community/slider';
 import React from 'react';
 import {
     Button,
+    Image,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -39,8 +40,48 @@ function App() {
         timeRate: 15,
     });
 
-    function ProgressBar() {
-        return (
+    return (
+        <View style={styles.container}>
+            <Text style={styles.name}>Name: {player.currentAudioName}</Text>
+            <Image source={require('./images/nezuko.png')} style={styles.avatar}/>
+            <View style={styles.actionButtonsOther}>
+                <TouchableOpacity onPress={player.decreaseTime} style={{justifyContent:'center'}}>
+                    <FontAwesomeIcon
+                        name='rotate-left'
+                        size={50}
+                        color='white'
+                    />
+                    <Text style={{position:'absolute', alignSelf:'center', marginTop:1, color:'white', fontSize:12 }}>{player.timeRate}</Text>
+                </TouchableOpacity>
+                {
+                    player.status === 'play' &&
+                        <TouchableOpacity onPress={player.pause} style={{marginHorizontal:20}}>
+                            <FontAwesomeIcon
+                                name='pause'
+                                color='white'
+                                size={50}
+                            />
+                        </TouchableOpacity>
+                }
+                {
+                    player.status === 'pause' &&
+                        <TouchableOpacity onPress={player.play} style={{marginHorizontal:20}}>
+                            <FontAwesomeIcon
+                                name='play'
+                                color='white'
+                                size={50}
+                            />
+                        </TouchableOpacity>
+                }
+                <TouchableOpacity onPress={player.increaseTime} style={{justifyContent:'center'}}>
+                    <FontAwesomeIcon
+                        name='rotate-right'
+                        size={50}
+                        color='white'
+                    />
+                    <Text style={{position:'absolute', alignSelf:'center', marginTop:1, color:'white', fontSize:12}}>{player.timeRate}</Text>
+                </TouchableOpacity>
+            </View>
             <View style={styles.progressBar}>
                 <Text style={styles.progressBarText}>{player.currentTimeString}</Text>
                 <Slider
@@ -53,15 +94,10 @@ function App() {
                     thumbTintColor='#FFFFFF'
                     onTouchStart={() => player.pause()}
                     onTouchEnd={() => player.play()}
-                    onValueChange={(seconds) => player.setCurrentTime(seconds)}
+                    onSlidingComplete={(seconds) => player.seekToTime(seconds)}
                 />
                 <Text style={styles.progressBarText}>{player.durationString}</Text>
             </View>
-        )
-    }
-
-    function ListSpeedButtons() {
-        return (
             <View style={styles.speed}>
                 {
                     listSpeedValues.map((item, index) => (
@@ -71,107 +107,6 @@ function App() {
                     ))
                 }
             </View>
-        )
-    }
-
-    function ActionPauseOrPlay() {
-        if (player.status === 'play') {
-            return (
-                <TouchableOpacity
-                    style={styles.pauseOrPlayButton}
-                    onPress={() => player.pause()}
-                >
-                    <FontAwesomeIcon
-                        name='pause'
-                        color='white'
-                        size={50}
-                    />
-                </TouchableOpacity>
-            )
-        }
-
-        return (
-            <TouchableOpacity
-                style={styles.pauseOrPlayButton}
-                onPress={() => player.play()}
-            >
-                <FontAwesomeIcon
-                    name='play'
-                    color='white'
-                    size={50}
-                />
-            </TouchableOpacity>
-        )
-    }
-
-    function ActionButtons() {
-        return (
-            <View style={styles.actionButtons}>
-                <AntDesignIcon
-                    name='sound'
-                    color='gray'
-                    size={150}
-                />
-                <View style={styles.actionButtonsOther}>
-                    <TouchableOpacity
-                        style={{
-                            justifyContent: 'center',
-                            zIndex: 10,
-                        }}
-                        onPress={() => player.decreaseTime()}
-                    >
-                        <FontAwesomeIcon
-                            style={{
-                                zIndex: 10,
-                            }}
-                            name='rotate-left'
-                            size={50}
-                            color='white'
-                        />
-                        <Text style={{ position: 'absolute', color: 'white', left: 15, zIndex: 10, }}>{player.timeRate}</Text>
-                    </TouchableOpacity>
-                    <ActionPauseOrPlay/>
-                    <TouchableOpacity
-                        style={{
-                            justifyContent: 'center',
-                            zIndex: 10,
-                        }}
-                        onPress={() => player.increaseTime()}
-                    >
-                        <FontAwesomeIcon
-                            style={{
-                                zIndex: 10,
-                            }}
-                            name='rotate-right'
-                            size={50}
-                            color='white'
-                        />
-                        <Text style={{ position: 'absolute', color: 'white', left: 10, zIndex: 10, }}>{player.timeRate}</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        )
-    }
-
-    return (
-        <View style={styles.container}>
-            <Text style={styles.name}>Name: {player.currentAudioName}</Text>
-            <ActionButtons/>
-            <ProgressBar/>
-            <ListSpeedButtons/>
-            <Button
-                title='Play'
-                onPress={() => player.play()}
-                disabled={player.isDisabledButtonPlay}
-            />
-            <Button
-                title='Pause'
-                onPress={() => player.pause()}
-                disabled={player.isDisabledButtonPause}/>
-            <Button
-                title='Stop'
-                onPress={() => player.stop()}
-                disabled={player.isDisabledButtonStop}/>
             <Button
                 title='Next'
                 onPress={() => player.next()}
@@ -188,20 +123,28 @@ function App() {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: 'black',
-        flex: 1,
+        flex:1,
+        justifyContent:'center',
+        backgroundColor:'black'
     },
     name: {
         color: 'white',
     },
+    avatar: {
+        width:200,
+        height:200,
+        marginBottom:15,
+        alignSelf:'center',
+        borderRadius: 100,
+    },
     progressBar: {
-        width: '100%',
         flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
+        marginVertical:15,
+        marginHorizontal:15,
     },
     progressBarText: {
         color: 'white',
+        alignSelf: 'center',
     },
     speed: {
         width: '100%',
@@ -217,13 +160,12 @@ const styles = StyleSheet.create({
         color: 'white',
     },
     actionButtons: {
-        width: '100%',
-        alignItems: 'center',
+        
     },
     actionButtonsOther: {
-        width: '100%',
-        flexDirection: 'row',
-        justifyContent: 'center',
+        flexDirection:'row',
+        justifyContent:'center',
+        marginVertical:15,
     },
     pauseOrPlayButton: {
         marginRight: 10,

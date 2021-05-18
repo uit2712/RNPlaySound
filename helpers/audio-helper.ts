@@ -20,7 +20,19 @@ export function useAudioHelper(request: IUseAudioHelper) {
     const [index, setIndex] = React.useState(0);
     const [currentTime, setCurrentTime] = React.useState(0);
     const [duration, setDuration] = React.useState(0);
-    
+
+    React.useEffect(() => {
+        const interval = setInterval(() => {
+            if (player && status === 'play') {
+                player.getCurrentTime((seconds: number) => {
+                    setCurrentTime(seconds);
+                })
+            }
+        }, 100);
+
+        return () => clearInterval(interval);
+    });
+
     const [speed, setSpeed] = React.useState(1);
     React.useEffect(() => {
         if (player) {
@@ -130,6 +142,13 @@ export function useAudioHelper(request: IUseAudioHelper) {
         }
     }
 
+    function seekToTime(seconds: number) {
+        if (player) {
+            player.setCurrentTime(seconds);
+            setCurrentTime(seconds);
+        }
+    }
+
     function formatTimeString(value: number) {
         return new Date(value * 1000).toISOString().substr(11, 8)
     }
@@ -159,11 +178,11 @@ export function useAudioHelper(request: IUseAudioHelper) {
     }
 
     function isDisabledButtonNext() {
-        return status === 'loading';
+        return status === 'loading' || index === listSounds.length - 1;
     }
 
     function isDisabledButtonPrevious() {
-        return status === 'loading';
+        return status === 'loading' || index === 0;
     }
 
     return {
@@ -185,7 +204,7 @@ export function useAudioHelper(request: IUseAudioHelper) {
         isDisabledButtonStop: isDisabledButtonStop(),
         isDisabledButtonNext: isDisabledButtonNext(),
         isDisabledButtonPrevious: isDisabledButtonPrevious(),
-        setCurrentTime,
+        seekToTime,
         timeRate,
         speed,
         setSpeed,
