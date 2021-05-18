@@ -22,6 +22,10 @@
       + [Increase time](#increase-time)
       + [Decrease time](#decrease-time)
       + [Other functions](#other-functions)
+- [References](#references)
+  * [React native sound](#react-native-sound-1)
+  * [React native sound demo](#react-native-sound-demo)
+  * [React native sound player preview](#react-native-sound-player-preview)
 # Library and installation
 - React native sound: https://www.npmjs.com/package/react-native-sound
 ```
@@ -286,7 +290,7 @@ function isDisabledButtonPrevious() {
     return status === 'loading' || index === 0;
 }
 ```
-# Reference
+# References
 ## React native sound
 Link: https://www.npmjs.com/package/react-native-sound
 ## React native sound demo
