@@ -12,23 +12,14 @@ import {
     Button,
     StyleSheet,
     Text,
-    ToastAndroid,
     TouchableOpacity,
     View,
 } from 'react-native';
 import SoundPlayer from 'react-native-sound';
+import AntDesignIcon from 'react-native-vector-icons/AntDesign';
+import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
+import { useAudioHelper } from './helpers/audio-helper';
 
-const statuses = {
-    loading: 0,
-    success: 1,
-    error: 2,
-    play: 3,
-    pause: 4,
-    next: 5,
-    previous: 6,
-    stop: 7,
-};
-const listSoundFileNames = ['blue_dream_cheel.mp3', 'know_myself_patrick_patrikios.mp3'];
 const listSpeedValues = [
     { value: 0.25, text: 'x0.25' },
     { value: 0.5, text: 'x0.5' },
@@ -40,149 +31,41 @@ const listSpeedValues = [
 ];
 
 function App() {
-    //#region current audio file index
-    const [currentFileIndex, setCurrentFileIndex] = React.useState(0);
-    React.useEffect(() => {
-        initSoundPlayer(listSoundFileNames[currentFileIndex]);
-    }, [currentFileIndex]);
-    //#endregion
+    const player = useAudioHelper({
+        listSounds: [
+            { path: 'blue_dream_cheel.mp3', mainBundle: SoundPlayer.MAIN_BUNDLE },
+            { path: 'know_myself_patrick_patrikios.mp3', mainBundle: SoundPlayer.MAIN_BUNDLE },
+        ],
+        timeRate: 15,
+    });
 
-    //#region init player
-    const [currentPlayer, setCurrentPlayer] = React.useState(new SoundPlayer(''));
-    function initSoundPlayer(audioName = '') {
-        if (!audioName) {
-            return;
-        }
-
-        currentPlayer?.release();
-        let player = new SoundPlayer(listSoundFileNames[currentFileIndex], SoundPlayer.MAIN_BUNDLE, (error) => {
-            if (error) {
-                setAudioStatus(statuses.error);
-            } else {
-                setAudioStatus(statuses.success);
-            }
-        });
-        setCurrentPlayer(player);
-    }
-    //#endregion
-
-    //#region player status
-    const [audioStatus, setAudioStatus] = React.useState(statuses.loading);
-    React.useEffect(() => {
-        switch(audioStatus) {
-            default: break;
-            case statuses.loading:
-                ToastAndroid.show('loading', ToastAndroid.SHORT);
-                break;
-            case statuses.success:
-                setAudioStatus(statuses.play);
-                break;
-            case statuses.error:
-                ToastAndroid.show(`Error when load audio: ${listSoundFileNames[currentFileIndex]}`, ToastAndroid.SHORT);
-                break;
-            case statuses.pause:
-                currentPlayer?.pause(() => ToastAndroid.show('pause', ToastAndroid.SHORT));
-                break;
-            case statuses.play:
-                play();
-                break;
-            case statuses.stop:
-                currentPlayer?.stop(() => ToastAndroid.show('stop', ToastAndroid.SHORT));
-                break;
-            case statuses.next:
-                if (currentFileIndex < listSoundFileNames.length - 1) {
-                    currentPlayer?.release();
-                    setCurrentFileIndex(currentFileIndex + 1);
-                }
-                break;
-            case statuses.previous:
-                if (currentFileIndex > 0) {
-                    currentPlayer?.release();
-                    setCurrentFileIndex(currentFileIndex - 1);
-                }
-                break;
-        }
-    }, [audioStatus]);
-    //#endregion
-
-    //#region play and current time
-    const [currentTime, setCurrentTime] = React.useState(0);
-    let tickInterval = null;
-    function play() {
-        if (tickInterval) {
-            clearInterval(tickInterval);
-        }
-
-        tickInterval = setInterval(() => {
-            currentPlayer?.getCurrentTime((seconds, isPlaying) => {
-                if (isPlaying === true) {
-                    setCurrentTime(seconds);
-                }
-            });
-        }, 250);
-        currentPlayer.play((isEnd) => {
-            if (isEnd === true) {
-                setAudioStatus(statuses.pause);
-                setCurrentTime(duration);
-            }
-        });
-    }
-
-    function getCurrentTime() {
-        if (currentPlayer) {
-            return new Date(currentTime * 1000).toISOString().substr(11, 8);
-        }
-
-        return new Date(0).toISOString().substr(11, 8);
-    }
-    //#endregion
-
-    //#region progress bar
-    const [duration, setDuration] = React.useState(0); // seconds
-    React.useEffect(() => {
-        if (audioStatus === statuses.success) {
-            setDuration(currentPlayer.getDuration());
-        }
-    }, [audioStatus]);
-    function getDuration() {
-        if (currentPlayer) {
-            return new Date(duration * 1000).toISOString().substr(11, 8);
-        }
-
-        return '';
-    }
     function ProgressBar() {
         return (
             <View style={styles.progressBar}>
-                <Text style={styles.progressBarText}>{getCurrentTime()}</Text>
+                <Text style={styles.progressBarText}>{player.currentTimeString}</Text>
                 <Slider
                     style={{width: '70%', height: 40}}
                     minimumValue={0}
-                    maximumValue={duration}
-                    value={currentTime}
+                    maximumValue={player.duration}
+                    value={player.currentTime}
                     minimumTrackTintColor="#FFFFFF"
-                    maximumTrackTintColor="#000000"
-                    onTouchStart={() => setAudioStatus(statuses.pause)}
-                    onTouchEnd={() => setAudioStatus(statuses.play)}
-                    onSlidingComplete={(seconds) => currentPlayer?.setCurrentTime(seconds)}
+                    maximumTrackTintColor="gray"
+                    thumbTintColor='#FFFFFF'
+                    onTouchStart={() => player.pause()}
+                    onTouchEnd={() => player.play()}
+                    onValueChange={(seconds) => player.setCurrentTime(seconds)}
                 />
-                <Text style={styles.progressBarText}>{getDuration()}</Text>
+                <Text style={styles.progressBarText}>{player.durationString}</Text>
             </View>
         )
     }
-    //#endregion
 
-    //#region speed
-    const [speed, setSpeed] = React.useState(1);
-    React.useEffect(() => {
-        currentPlayer?.setSpeed(speed);
-    }, [speed]);
     function ListSpeedButtons() {
         return (
             <View style={styles.speed}>
                 {
                     listSpeedValues.map((item, index) => (
-                        <TouchableOpacity key={index} style={styles.speedItem} onPress={() => setSpeed(item.value)}>
+                        <TouchableOpacity key={index} style={styles.speedItem} onPress={() => player.setSpeed(item.value)}>
                             <Text style={styles.speedItemText}>{item.text}</Text>
                         </TouchableOpacity>
                     ))
@@ -190,18 +73,115 @@ function App() {
             </View>
         )
     }
-    //#endregion
+
+    function ActionPauseOrPlay() {
+        if (player.status === 'play') {
+            return (
+                <TouchableOpacity
+                    style={styles.pauseOrPlayButton}
+                    onPress={() => player.pause()}
+                >
+                    <FontAwesomeIcon
+                        name='pause'
+                        color='white'
+                        size={50}
+                    />
+                </TouchableOpacity>
+            )
+        }
+
+        return (
+            <TouchableOpacity
+                style={styles.pauseOrPlayButton}
+                onPress={() => player.play()}
+            >
+                <FontAwesomeIcon
+                    name='play'
+                    color='white'
+                    size={50}
+                />
+            </TouchableOpacity>
+        )
+    }
+
+    function ActionButtons() {
+        return (
+            <View style={styles.actionButtons}>
+                <AntDesignIcon
+                    name='sound'
+                    color='gray'
+                    size={150}
+                />
+                <View style={styles.actionButtonsOther}>
+                    <TouchableOpacity
+                        style={{
+                            justifyContent: 'center',
+                            zIndex: 10,
+                        }}
+                        onPress={() => player.decreaseTime()}
+                    >
+                        <FontAwesomeIcon
+                            style={{
+                                zIndex: 10,
+                            }}
+                            name='rotate-left'
+                            size={50}
+                            color='white'
+                        />
+                        <Text style={{ position: 'absolute', color: 'white', left: 15, zIndex: 10, }}>{player.timeRate}</Text>
+                    </TouchableOpacity>
+                    <ActionPauseOrPlay/>
+                    <TouchableOpacity
+                        style={{
+                            justifyContent: 'center',
+                            zIndex: 10,
+                        }}
+                        onPress={() => player.increaseTime()}
+                    >
+                        <FontAwesomeIcon
+                            style={{
+                                zIndex: 10,
+                            }}
+                            name='rotate-right'
+                            size={50}
+                            color='white'
+                        />
+                        <Text style={{ position: 'absolute', color: 'white', left: 10, zIndex: 10, }}>{player.timeRate}</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        )
+    }
 
     return (
         <View style={styles.container}>
-            <Text>Name: {listSoundFileNames[currentFileIndex]}</Text>
+            <Text style={styles.name}>Name: {player.currentAudioName}</Text>
+            <ActionButtons/>
             <ProgressBar/>
             <ListSpeedButtons/>
-            <Button title='Play' onPress={() => setAudioStatus(statuses.play)} disabled={audioStatus === statuses.play || audioStatus === statuses.loading}/>
-            <Button title='Pause' onPress={() => setAudioStatus(statuses.pause)} disabled={audioStatus === statuses.pause || audioStatus === statuses.stop || audioStatus === statuses.loading}/>
-            <Button title='Stop' onPress={() => setAudioStatus(statuses.stop)} disabled={audioStatus === statuses.stop || audioStatus === statuses.loading}/>
-            <Button title='Next' onPress={() => setAudioStatus(statuses.next)} disabled={audioStatus === statuses.loading}/>
-            <Button title='Previous' onPress={() => setAudioStatus(statuses.previous)} disabled={audioStatus === statuses.loading}/>
+            <Button
+                title='Play'
+                onPress={() => player.play()}
+                disabled={player.isDisabledButtonPlay}
+            />
+            <Button
+                title='Pause'
+                onPress={() => player.pause()}
+                disabled={player.isDisabledButtonPause}/>
+            <Button
+                title='Stop'
+                onPress={() => player.stop()}
+                disabled={player.isDisabledButtonStop}/>
+            <Button
+                title='Next'
+                onPress={() => player.next()}
+                disabled={player.isDisabledButtonNext}
+            />
+            <Button
+                title='Previous'
+                onPress={() => player.previous()}
+                disabled={player.isDisabledButtonPrevious}
+            />
         </View>
     );
 };
@@ -210,6 +190,9 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: 'black',
         flex: 1,
+    },
+    name: {
+        color: 'white',
     },
     progressBar: {
         width: '100%',
@@ -232,6 +215,26 @@ const styles = StyleSheet.create({
     },
     speedItemText: {
         color: 'white',
+    },
+    actionButtons: {
+        width: '100%',
+        alignItems: 'center',
+    },
+    actionButtonsOther: {
+        width: '100%',
+        flexDirection: 'row',
+        justifyContent: 'center',
+    },
+    pauseOrPlayButton: {
+        marginRight: 10,
+        marginLeft: 10,
+        width: 50,
+    },
+    actionButtonsOtherTimeDown: {
+        // left: -35,
+    },
+    actionButtonsOtherTimeUp: {
+        // width: 40,
     }
 });
 
