@@ -12,12 +12,12 @@ export type AudioStatusType = 'loading' | 'success' | 'error' | 'play' | 'pause'
 
 interface IUseAudioHelper {
     listSounds: ISoundFile[];
-    timeRate?: number;
+    timeRate?: number; // seconds
 }
 
 export function useAudioHelper(request: IUseAudioHelper) {
     const [listSounds, setListSounds] = React.useState(request.listSounds);
-    const [timeRate, setTimeRate] = React.useState(request.timeRate || 15);
+    const [timeRate, setTimeRate] = React.useState(request.timeRate || 15); // seconds
     const [status, setStatus] = React.useState<AudioStatusType>('loading');
     
     const [currentTime, setCurrentTime] = React.useState(0);
