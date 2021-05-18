@@ -1,12 +1,27 @@
 # React native sound
 # Table of content
 - [Library and installation](#library-and-installation)
-- [Heading](#heading-1)
-  * [Sub-heading](#sub-heading-1)
-    + [Sub-sub-heading](#sub-sub-heading-1)
-- [Heading](#heading-2)
-  * [Sub-heading](#sub-heading-2)
-    + [Sub-sub-heading](#sub-sub-heading-2)
+- [Usage](#usage)
+  * [Load sound from the app bundle](#load-sound-from-the-app-bundle)
+  * [Load sound from the network](#load-sound-from-the-network)
+  * [Load sound from other directories](#load-sound-from-other-directories)
+- [Steps](#steps)
+  * [Step 1: Install all necessary libraries](#step-1-install-all-necessary-libraries)
+  * [Step 2: Create audio-helper](#step-2-create-audio-helper)
+    + [Step 2.1: Create interfaces and types](#step-21-create-interfaces-and-types)
+    + [Step 2.2: Create hook useAudioHelper](#step-22-create-hook-useaudiohelper)
+      + [Initialize sound player](#initialize-sound-player)
+      + [Current time](#current-time)
+      + [Initialize sound player every time we play new sound](#initialize-sound-player-every-time-we-play-new-sound)
+      + [Play sound](#play-sound)
+      + [Pause sound](#pause-sound)
+      + [Stop sound](#stop-sound)
+      + [Next sound](#next-sound)
+      + [Previous sound](#previous-sound)
+      + [Seek to time](#seek-to-time)
+      + [Increase time](#increase-time)
+      + [Decrease time](#decrease-time)
+      + [Other functions](#other-functions)
 # Library and installation
 - React native sound: https://www.npmjs.com/package/react-native-sound
 ```
@@ -69,7 +84,7 @@ interface IUseAudioHelper {
 ```
 ### Step 2.2: Create hook useAudioHelper
 Hook __useAudioHelper__ has all methods, values we need like: play, pause, currentTime,...
-- Create state variables:
+#### Create state variables:
 ```javascript
 const [listSounds, setListSounds] = React.useState(request.listSounds);
 const [timeRate, setTimeRate] = React.useState(request.timeRate || 15);
