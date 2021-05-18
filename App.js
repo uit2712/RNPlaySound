@@ -9,7 +9,6 @@
 import Slider from '@react-native-community/slider';
 import React from 'react';
 import {
-    Button,
     Image,
     StyleSheet,
     Text,
