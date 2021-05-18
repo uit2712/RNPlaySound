@@ -19,10 +19,8 @@ export function useAudioHelper(request: IUseAudioHelper) {
     const [listSounds, setListSounds] = React.useState(request.listSounds);
     const [timeRate, setTimeRate] = React.useState(request.timeRate || 15);
     const [status, setStatus] = React.useState<AudioStatusType>('loading');
-    const [index, setIndex] = React.useState(0);
+    
     const [currentTime, setCurrentTime] = React.useState(0);
-    const [duration, setDuration] = React.useState(0);
-
     React.useEffect(() => {
         const interval = setInterval(() => {
             if (player && status === 'play') {
@@ -42,7 +40,15 @@ export function useAudioHelper(request: IUseAudioHelper) {
         }
     }, [speed]);
 
+    const [duration, setDuration] = React.useState(0);
     const [player, setPlayer] = React.useState<SoundPlayer>(null);
+    function playWithPlayer(player: SoundPlayer) {
+        if (player) {
+            player.play(playComplete);
+            setStatus('play');
+        }
+    }
+
     function initialize() {
         setStatus('loading');
         if (listSounds.length > 0) {
@@ -72,6 +78,8 @@ export function useAudioHelper(request: IUseAudioHelper) {
             }
         }
     }
+
+    const [index, setIndex] = React.useState(0);
     React.useEffect(() => {
         initialize();
     }, [index]);
@@ -79,13 +87,6 @@ export function useAudioHelper(request: IUseAudioHelper) {
     function playComplete(isEnd: boolean) {
         if (isEnd === true) {
             next();
-        }
-    }
-
-    function playWithPlayer(player: SoundPlayer) {
-        if (player) {
-            player.play(playComplete);
-            setStatus('play');
         }
     }
 
@@ -132,11 +133,9 @@ export function useAudioHelper(request: IUseAudioHelper) {
         if (player) {
             player.getCurrentTime((seconds) => {
                 if (seconds + timeRate < duration) {
-                    player.setCurrentTime(seconds + timeRate);
-                    setCurrentTime(seconds + timeRate);
+                    seekToTime(seconds + timeRate)
                 } else {
-                    player.setCurrentTime(duration);
-                    setCurrentTime(duration);
+                    seekToTime(duration);
                 }
             });
         }
@@ -146,11 +145,9 @@ export function useAudioHelper(request: IUseAudioHelper) {
         if (player) {
             player.getCurrentTime((seconds) => {
                 if (seconds - timeRate > 0) {
-                    player.setCurrentTime(seconds - timeRate);
-                    setCurrentTime(seconds - timeRate);
+                    seekToTime(seconds - timeRate);
                 } else {
-                    player.setCurrentTime(0);
-                    setCurrentTime(0);
+                    seekToTime(0);
                 }
             });
         }
