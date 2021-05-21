@@ -12,6 +12,7 @@
     + [Step 2.2: Create hook useAudioHelper](#step-22-create-hook-useaudiohelper)
       + [Initialize sound player](#initialize-sound-player)
       + [Current time](#current-time)
+      + [Speed](#speed)
       + [Initialize sound player every time we play new sound](#initialize-sound-player-every-time-we-play-new-sound)
       + [Play sound](#play-sound)
       + [Pause sound](#pause-sound)
@@ -151,6 +152,15 @@ React.useEffect(() => {
 
     return () => clearInterval(interval);
 });
+```
+#### Speed
+```javascript
+const [speed, setSpeed] = React.useState(1);
+    React.useEffect(() => {
+        if (player) {
+            player.setSpeed(speed);
+        }
+    }, [speed]);
 ```
 #### Initialize sound player every time we play new sound:
 ```javascript
