@@ -317,7 +317,7 @@ return {
 }
 ```
 ## Step 3: Apply hook useAudioHelper
-```
+```javascript
 const player = useAudioHelper({
     listSounds: [
         { path: 'blue_dream_cheel.mp3', name: 'Blue Dream - Cheel', basePath: SoundPlayer.MAIN_BUNDLE },
