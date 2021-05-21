@@ -15,9 +15,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import SoundPlayer from 'react-native-sound';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
-import { useAudioHelper } from './helpers/audio-helper';
 
 const listSpeedValues = [
     { value: 0.25, text: 'x0.25' },
@@ -30,55 +28,49 @@ const listSpeedValues = [
 ];
 
 function App() {
-    const player = useAudioHelper({
-        listSounds: [
-            { path: 'blue_dream_cheel.mp3', name: 'Blue Dream - Cheel', basePath: SoundPlayer.MAIN_BUNDLE },
-            { path: 'know_myself_patrick_patrikios.mp3', name: 'Know Myself - Patrick Patrikios', basePath: SoundPlayer.MAIN_BUNDLE },
-            { path: require('./sounds/Play-Doh-meets-Dora_Carmen-Maria-and-Edu-Espinal.mp3'), name: 'Play Doh meets Dora - Carmen Maria and Edu Espinal', isRequired: true, },
-            { path: 'https://raw.githubusercontent.com/uit2712/RNPlaySound/develop/sounds/Tropic%20-%20Anno%20Domini%20Beats.mp3', name: 'Tropic - Anno Domini Beats', },
-        ],
-        timeRate: 15,
-    });
+    const [status, setStatus] = React.useState('play');
+    const [speed, setSpeed] = React.useState(1);
+    const [timeRate, setTimeRate] = React.useState(15); // seconds
 
     return (
         <View style={styles.container}>
-            <Text style={styles.name}>Name: {player.currentAudioName}</Text>
+            <Text style={styles.name}>Name:</Text>
             <View style={styles.changeAudio}>
-                <TouchableOpacity onPress={player.previous}>
+                <TouchableOpacity onPress={() => {}}>
                     <FontAwesomeIcon
                         name='step-backward'
                         size={50}
-                        color={player.isDisabledButtonPrevious === false ? 'white' : 'gray'}
+                        color={'white'}
                     />
                 </TouchableOpacity>
                 <Image source={require('./images/nezuko.png')} style={styles.avatar}/>
-                <TouchableOpacity onPress={player.next} style={styles.button}>
+                <TouchableOpacity onPress={() => {}} style={styles.button}>
                     <FontAwesomeIcon
                         name='step-forward'
                         size={50}
-                        color={player.isDisabledButtonNext === false ? 'white' : 'gray'}
+                        color={'white'}
                     />
                 </TouchableOpacity>
             </View>
             <View style={styles.actionButtonsOther}>
-                <TouchableOpacity onPress={player.decreaseTime} style={styles.button}>
+                <TouchableOpacity onPress={() => {}} style={styles.button}>
                     <FontAwesomeIcon
                         name='rotate-left'
                         size={50}
                         color='white'
                     />
-                    <Text style={{position:'absolute', alignSelf:'center', marginTop:1, color:'white', fontSize:12 }}>{player.timeRate}</Text>
+                    <Text style={{position:'absolute', alignSelf:'center', marginTop:1, color:'white', fontSize:12 }}>{timeRate}</Text>
                 </TouchableOpacity>
                 {
-                    player.status === 'play' ?
-                        <TouchableOpacity onPress={player.pause} style={{marginHorizontal:20}}>
+                    status === 'play' ?
+                        <TouchableOpacity onPress={() => {}} style={{marginHorizontal:20}}>
                             <FontAwesomeIcon
                                 name='pause'
                                 color='white'
                                 size={50}
                             />
                         </TouchableOpacity> :
-                        <TouchableOpacity onPress={player.play} style={{marginHorizontal:20}}>
+                        <TouchableOpacity onPress={() => {}} style={{marginHorizontal:20}}>
                             <FontAwesomeIcon
                                 name='play'
                                 color='white'
@@ -86,30 +78,30 @@ function App() {
                             />
                         </TouchableOpacity>
                 }
-                <TouchableOpacity onPress={player.increaseTime} style={styles.button}>
+                <TouchableOpacity onPress={() => {}} style={styles.button}>
                     <FontAwesomeIcon
                         name='rotate-right'
                         size={50}
                         color='white'
                     />
-                    <Text style={{position:'absolute', alignSelf:'center', marginTop:1, color:'white', fontSize:12}}>{player.timeRate}</Text>
+                    <Text style={{position:'absolute', alignSelf:'center', marginTop:1, color:'white', fontSize:12}}>{timeRate}</Text>
                 </TouchableOpacity>
             </View>
             <View style={styles.progressBar}>
-                <Text style={styles.progressBarText}>{player.currentTimeString}</Text>
+                <Text style={styles.progressBarText}>00:00:00</Text>
                 <Slider
                     style={{width: '70%', height: 40}}
                     minimumValue={0}
-                    maximumValue={player.duration}
-                    value={player.currentTime}
+                    maximumValue={100}
+                    value={0}
                     minimumTrackTintColor="#FFFFFF"
                     maximumTrackTintColor="gray"
                     thumbTintColor='#FFFFFF'
-                    onTouchStart={() => player.pause()}
-                    onTouchEnd={() => player.play()}
-                    onSlidingComplete={(seconds) => player.seekToTime(seconds)}
+                    onTouchStart={() => {}}
+                    onTouchEnd={() => {}}
+                    onSlidingComplete={(seconds) => {}}
                 />
-                <Text style={styles.progressBarText}>{player.durationString}</Text>
+                <Text style={styles.progressBarText}>10:10:10</Text>
             </View>
             <View style={styles.speed}>
                 {
@@ -117,10 +109,10 @@ function App() {
                         <TouchableOpacity
                             key={index}
                             style={styles.speedItem}
-                            onPress={() => player.setSpeed(item.value)}
+                            onPress={() => setSpeed(item.value)}
                         >
                             <Text style={{
-                                color: player.speed === item.value ? '#3399ff' : 'white'
+                                color: speed === item.value ? '#3399ff' : 'white'
                             }}>{item.text}</Text>
                         </TouchableOpacity>
                     ))
