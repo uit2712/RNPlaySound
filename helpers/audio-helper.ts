@@ -1,20 +1,28 @@
 import SoundPlayer from 'react-native-sound';
 import React from 'react';
 
-interface ISoundFile {
-    path: string | NodeRequire;
-    basePath?: string;
-    name: string;
-    isRequired?: boolean;
-}
-
 type AudioStatusType = 'loading' | 'success' | 'error' | 'play' | 'pause' | 'next' | 'previous' | 'stop';
 
 interface IUseAudioHelper {
-    listSounds: ISoundFile[];
+    listSounds: SoundFileType[];
     timeRate?: number; // seconds
     isLogStatus?: boolean;
 }
+
+type SoundFileType = {
+    type: 'app-bundle';
+    name: string;
+    path: string;
+    basePath: string;
+} | {
+    type: 'network';
+    name: string;
+    path: string;
+} | {
+    type: 'directory';
+    name: string;
+    path: NodeRequire;
+};
 
 /* Randomize array in-place using Durstenfeld shuffle algorithm */
 function shuffleArray<T>(array: T[]) {
@@ -84,11 +92,20 @@ export function useAudioHelper(request: IUseAudioHelper = {
 
             const currentAudio = listSounds[index];
             // If the audio is a 'require' then the second parameter must be the callback.
-            if (currentAudio.isRequired === true) {
-                const newPlayer = new SoundPlayer(currentAudio.path, (error) => callback(error, newPlayer));
-                setPlayer(newPlayer);
-            } else {
-                const newPlayer = new SoundPlayer(currentAudio.path, currentAudio.basePath, (error) => callback(error, newPlayer));
+            let newPlayer: SoundPlayer = null;
+            switch(currentAudio.type) {
+                default: break;
+                case 'app-bundle':
+                    newPlayer = new SoundPlayer(currentAudio.path, currentAudio.basePath, (error) => callback(error, newPlayer));
+                    break;
+                case 'network':
+                    newPlayer = new SoundPlayer(currentAudio.path, null, (error) => callback(error, newPlayer));
+                    break;
+                case 'directory':
+                    newPlayer = new SoundPlayer(currentAudio.path, (error) => callback(error, newPlayer));
+                    break;
+            }
+            if (newPlayer) {
                 setPlayer(newPlayer);
             }
         }
