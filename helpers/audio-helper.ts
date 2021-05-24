@@ -28,37 +28,13 @@ function shuffleArray<T>(array: T[]) {
     return array;
 }
 
-/**
- * Returns a random number between min (inclusive) and max (exclusive)
- */
-function getRandomArbitrary({
-    min,
-    max,
-    exceptValue
-}: {
-    min: number,
-    max: number,
-    exceptValue?: number,
+export function useAudioHelper(request: IUseAudioHelper = {
+    listSounds: [],
+    isLogStatus: false,
+    timeRate: 15,
 }) {
-    if (max - min <= 0) {
-        return 0;
-    }
-
-    let result = Math.floor((Math.random() * min) + max);
-    if (exceptValue === null || exceptValue === undefined) {
-        return result;
-    }
-
-    while(result === exceptValue) {
-        result = Math.floor(Math.random() * max) + min;
-    }
-
-    return result;
-}
-
-export function useAudioHelper(request: IUseAudioHelper) {
     const [listSounds, setListSounds] = React.useState(request.listSounds);
-    const [timeRate, setTimeRate] = React.useState(request.timeRate || 15); // seconds
+    const [timeRate, setTimeRate] = React.useState(request.timeRate); // seconds
     const [status, setStatus] = React.useState<AudioStatusType>('loading');
     const [errorMessage, setErrorMessage] = React.useState('');
     
@@ -76,11 +52,12 @@ export function useAudioHelper(request: IUseAudioHelper) {
     });
 
     const [speed, setSpeed] = React.useState(1);
-    React.useEffect(() => {
-        if (player) {
-            player.setSpeed(speed);
+    function changeSpeed(value: number) {
+        if (player && value > 0 && value <= 2) {
+            player.setSpeed(value);
+            setSpeed(value);
         }
-    }, [speed]);
+    }
 
     const [duration, setDuration] = React.useState(0);
     const [player, setPlayer] = React.useState<SoundPlayer>(null);
@@ -335,9 +312,6 @@ export function useAudioHelper(request: IUseAudioHelper) {
     }
 
     return {
-        status,
-        duration,
-        currentTime,
         play: () => play(player),
         pause,
         stop,
@@ -345,6 +319,16 @@ export function useAudioHelper(request: IUseAudioHelper) {
         previous,
         increaseTime,
         decreaseTime,
+        seekToTime,
+        setSpeed: (speed: number) => changeSpeed(speed),
+        shuffle,
+        loop,
+        mute,
+        unmute,
+        setVolume: (volume: number) => changeVolume(player, volume),
+        status,
+        duration,
+        currentTime,
         durationString: getDurationString(),
         currentTimeString: getCurrentTimeString(),
         currentAudioName: getCurrentAudioName(),
@@ -353,19 +337,12 @@ export function useAudioHelper(request: IUseAudioHelper) {
         isDisabledButtonStop: isDisabledButtonStop(),
         isDisabledButtonNext: isDisabledButtonNext(),
         isDisabledButtonPrevious: isDisabledButtonPrevious(),
-        seekToTime,
         timeRate,
         speed,
-        setSpeed,
-        shuffle,
         isShuffle,
         errorMessage,
-        loop,
         isLoop,
-        mute,
-        unmute,
         isMuted,
-        setVolume: (volume: number) => changeVolume(player, volume),
         volume,
     }
 }

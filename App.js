@@ -56,7 +56,10 @@ function App() {
                     />
                 </TouchableOpacity>
                 <Image source={require('./images/nezuko.png')} style={styles.avatar}/>
-                <TouchableOpacity onPress={player.next} style={styles.button}>
+                <TouchableOpacity
+                    onPress={player.next}
+                    style={styles.button}
+                >
                     <FontAwesomeIcon
                         name='step-forward'
                         size={50}
@@ -65,7 +68,10 @@ function App() {
                 </TouchableOpacity>
             </View>
             <View style={styles.actionButtonsOther}>
-                <TouchableOpacity onPress={player.decreaseTime} style={styles.button}>
+                <TouchableOpacity
+                    onPress={player.decreaseTime}
+                    style={styles.button}
+                >
                     <FontAwesomeIcon
                         name='rotate-left'
                         size={50}
@@ -75,14 +81,20 @@ function App() {
                 </TouchableOpacity>
                 {
                     player.status === 'play' ?
-                        <TouchableOpacity onPress={player.pause} style={{marginHorizontal:20}}>
+                        <TouchableOpacity
+                            onPress={player.pause}
+                            style={{marginHorizontal:20}}
+                        >
                             <FontAwesomeIcon
                                 name='pause'
                                 color='white'
                                 size={50}
                             />
                         </TouchableOpacity> :
-                        <TouchableOpacity onPress={player.play} style={{marginHorizontal:20}}>
+                        <TouchableOpacity
+                            onPress={player.play}
+                            style={{marginHorizontal:20}}
+                        >
                             <FontAwesomeIcon
                                 name='play'
                                 color='white'
@@ -90,7 +102,10 @@ function App() {
                             />
                         </TouchableOpacity>
                 }
-                <TouchableOpacity onPress={player.increaseTime} style={styles.button}>
+                <TouchableOpacity
+                    onPress={player.increaseTime}
+                    style={styles.button}
+                >
                     <FontAwesomeIcon
                         name='rotate-right'
                         size={50}
@@ -100,23 +115,43 @@ function App() {
                 </TouchableOpacity>
             </View>
             <View style={styles.actionButtonsOther}>
-                <TouchableOpacity onPress={player.shuffle} style={styles.button}>
+                <TouchableOpacity
+                    onPress={player.shuffle}
+                    style={styles.button}
+                >
                     <EntypoIcon
                         name='shuffle'
                         color={player.isShuffle === true ? '#3399ff' : 'white'}
                         size={50}
                     />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={player.loop} style={styles.button}>
+                <TouchableOpacity
+                    onPress={player.loop}
+                    style={styles.button}
+                >
                     <MaterialIcon
                         name='loop'
                         color={player.isLoop === true ? '#3399ff' : 'white'}
                         size={50}
                     />
                 </TouchableOpacity>
+                <TouchableOpacity
+                    onPress={player.stop}
+                    style={styles.button}
+                    disabled={player.isDisabledButtonStop}
+                >
+                    <EntypoIcon
+                        name='controller-stop'
+                        color={player.status === 'stop' ? 'red' : 'white'}
+                        size={50}
+                    />
+                </TouchableOpacity>
                 {
                     player.isMuted === false ? (
-                        <TouchableOpacity onPress={player.mute} style={styles.button}>
+                        <TouchableOpacity
+                            onPress={player.mute}
+                            style={styles.button}
+                        >
                             <EntypoIcon
                                 name='sound'
                                 color={'white'}
@@ -124,7 +159,10 @@ function App() {
                             />
                         </TouchableOpacity>
                     ) : (
-                        <TouchableOpacity onPress={player.unmute} style={styles.button}>
+                        <TouchableOpacity
+                            onPress={player.unmute}
+                            style={styles.button}
+                        >
                             <EntypoIcon
                                 name='sound-mute'
                                 color={'red'}
