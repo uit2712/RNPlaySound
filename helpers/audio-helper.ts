@@ -13,12 +13,54 @@ type AudioStatusType = 'loading' | 'success' | 'error' | 'play' | 'pause' | 'nex
 interface IUseAudioHelper {
     listSounds: ISoundFile[];
     timeRate?: number; // seconds
+    isLogStatus?: boolean;
+}
+
+/* Randomize array in-place using Durstenfeld shuffle algorithm */
+function shuffleArray<T>(array: T[]) {
+    for (let i = array.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        let temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+
+    return array;
+}
+
+/**
+ * Returns a random number between min (inclusive) and max (exclusive)
+ */
+function getRandomArbitrary({
+    min,
+    max,
+    exceptValue
+}: {
+    min: number,
+    max: number,
+    exceptValue?: number,
+}) {
+    if (max - min <= 0) {
+        return 0;
+    }
+
+    let result = Math.floor((Math.random() * min) + max);
+    if (exceptValue === null || exceptValue === undefined) {
+        return result;
+    }
+
+    while(result === exceptValue) {
+        result = Math.floor(Math.random() * max) + min;
+    }
+
+    return result;
 }
 
 export function useAudioHelper(request: IUseAudioHelper) {
     const [listSounds, setListSounds] = React.useState(request.listSounds);
     const [timeRate, setTimeRate] = React.useState(request.timeRate || 15); // seconds
     const [status, setStatus] = React.useState<AudioStatusType>('loading');
+    const [errorMessage, setErrorMessage] = React.useState('');
     
     const [currentTime, setCurrentTime] = React.useState(0);
     React.useEffect(() => {
@@ -59,8 +101,10 @@ export function useAudioHelper(request: IUseAudioHelper) {
             const callback = (error, player: SoundPlayer) => {
                 if (error) {
                     setStatus('error');
+                    setErrorMessage(error.message);
                 } else {
                     setStatus('success');
+                    setErrorMessage('');
                 }
                 player.setSpeed(speed);
                 setDuration(player.getDuration());
@@ -83,6 +127,37 @@ export function useAudioHelper(request: IUseAudioHelper) {
     React.useEffect(() => {
         initialize();
     }, [index]);
+
+    const [isShuffle, setIsShuffle] = React.useState(false);
+    function shuffle() {
+        setIsShuffle(!isShuffle);
+    }
+
+    React.useEffect(() => {
+        if (request.isLogStatus === true) {
+            switch(status) {
+                default: break;
+                case 'loading':
+                    console.log('loading...');
+                    break;
+                case 'next':
+                    console.log('next...');
+                    break;
+                case 'pause':
+                    console.log('pause...');
+                    break;
+                case 'play':
+                    console.log('play...');
+                    break;
+                case 'previous':
+                    console.log('previous...');
+                    break;
+                case 'stop':
+                    console.log('stop...');
+                    break;
+            }
+        }
+    }, [request.isLogStatus, status])
 
     function playComplete(isEnd: boolean) {
         if (isEnd === true) {
@@ -111,12 +186,25 @@ export function useAudioHelper(request: IUseAudioHelper) {
         }
     }
 
+    const [remainingIndices, setRemainingIndices] = React.useState([...Array(request.listSounds.length).keys()].filter(value => value !== index));
+    React.useEffect(() => {
+        setRemainingIndices(remainingIndices.filter(value => value !== index));
+    }, [index]);
+    
     function next() {
-        if (player && index < listSounds.length - 1) {
+        if (player && request.listSounds.length) {
             player.release();
             setCurrentTime(0);
             setStatus('next');
-            setIndex(index + 1);
+            
+            if (isShuffle === true) {
+                let newRemainingIndices = shuffleArray(remainingIndices.length === 0 ? [...Array(request.listSounds.length).keys()].filter(value => value !== index) : remainingIndices);
+                setRemainingIndices(newRemainingIndices);
+                setIndex(newRemainingIndices[0]);
+            } else {
+                console.log('nextIndex: ', (index + 1) % request.listSounds.length);
+                setIndex((index + 1) % request.listSounds.length);
+            }
         }
     }
 
@@ -219,5 +307,8 @@ export function useAudioHelper(request: IUseAudioHelper) {
         timeRate,
         speed,
         setSpeed,
+        shuffle,
+        isShuffle,
+        errorMessage,
     }
 }

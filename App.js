@@ -12,11 +12,13 @@ import {
     Image,
     StyleSheet,
     Text,
+    ToastAndroid,
     TouchableOpacity,
     View,
 } from 'react-native';
 import SoundPlayer from 'react-native-sound';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
+import EntypoIcon from 'react-native-vector-icons/Entypo';
 import { useAudioHelper } from './helpers/audio-helper';
 
 const listSpeedValues = [
@@ -38,7 +40,14 @@ function App() {
             { path: 'https://raw.githubusercontent.com/uit2712/RNPlaySound/develop/sounds/Tropic%20-%20Anno%20Domini%20Beats.mp3', name: 'Tropic - Anno Domini Beats', },
         ],
         timeRate: 15,
+        isLogStatus: true,
     });
+
+    React.useEffect(() => {
+        if (player.errorMessage) {
+            ToastAndroid.show(player.errorMessage, ToastAndroid.SHORT);
+        }
+    }, [player.errorMessage]);
 
     return (
         <View style={styles.container}>
@@ -95,6 +104,15 @@ function App() {
                     <Text style={{position:'absolute', alignSelf:'center', marginTop:1, color:'white', fontSize:12}}>{player.timeRate}</Text>
                 </TouchableOpacity>
             </View>
+            <View style={styles.actionButtonsOther}>
+                <TouchableOpacity onPress={player.shuffle} style={styles.button}>
+                    <EntypoIcon
+                        name='shuffle'
+                        color={player.isShuffle === true ? '#3399ff' : 'white'}
+                        size={50}
+                    />
+                </TouchableOpacity>
+            </View>
             <View style={styles.progressBar}>
                 <Text style={styles.progressBarText}>{player.currentTimeString}</Text>
                 <Slider
@@ -105,8 +123,8 @@ function App() {
                     minimumTrackTintColor="#FFFFFF"
                     maximumTrackTintColor="gray"
                     thumbTintColor='#FFFFFF'
-                    onTouchStart={() => player.pause()}
-                    onTouchEnd={() => player.play()}
+                    onTouchStart={player.pause}
+                    onTouchEnd={player.play}
                     onSlidingComplete={(seconds) => player.seekToTime(seconds)}
                 />
                 <Text style={styles.progressBarText}>{player.durationString}</Text>
