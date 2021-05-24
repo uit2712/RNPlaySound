@@ -133,6 +133,16 @@ function App() {
                         </TouchableOpacity>
                     )
                 }
+                <Slider
+                    style={{width: '40%', height: 50}}
+                    minimumValue={0}
+                    maximumValue={100}
+                    value={player.volume}
+                    minimumTrackTintColor="#FFFFFF"
+                    maximumTrackTintColor="gray"
+                    thumbTintColor='#FFFFFF'
+                    onSlidingComplete={(volume) => player.setVolume(volume)}
+                />
             </View>
             <View style={styles.progressBar}>
                 <Text style={styles.progressBarText}>{player.currentTimeString}</Text>

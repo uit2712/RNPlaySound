@@ -170,10 +170,10 @@ export function useAudioHelper(request: IUseAudioHelper) {
 
     function play(player: SoundPlayer) {
         if (player) {
-            player.play(playComplete);
             if (isMuted === true) {
                 changeVolume(player, 0);
             }
+            player.play(playComplete);
             setStatus('play');
         }
     }
@@ -267,22 +267,27 @@ export function useAudioHelper(request: IUseAudioHelper) {
     }
 
     const [volume, setVolume] = React.useState(100); // percent
-    function changeVolume(player: SoundPlayer, volume: number, isChangeRealVolume: boolean = false) {
+    const [previousVolume, setPreviousVolume] = React.useState(volume);
+    function changeVolume(player: SoundPlayer, volume: number) {
         if (player && volume >= 0 && volume <= 100) {
             player.setVolume(volume / 100.0);
-            if (isChangeRealVolume === false) {
-                setVolume(volume);
-            }
+            setVolume(volume);
         }
     }
 
-    const [previousVolume, setPreviousVolume] = React.useState(volume);
+
     const [isMuted, setIsMuted] = React.useState(false);
+    React.useEffect(() => {
+        if (volume > 0 && isMuted === true) {
+            setIsMuted(false);
+        }
+    }, [volume]);
+
     function mute() {
         if (isMuted === false) {
             setIsMuted(true);
             setPreviousVolume(volume);
-            changeVolume(player, 0, true);
+            changeVolume(player, 0);
         }
     }
 
@@ -360,5 +365,7 @@ export function useAudioHelper(request: IUseAudioHelper) {
         mute,
         unmute,
         isMuted,
+        setVolume: (volume: number) => changeVolume(player, volume),
+        volume,
     }
 }
