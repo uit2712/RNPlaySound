@@ -13,12 +13,30 @@ type AudioStatusType = 'loading' | 'success' | 'error' | 'play' | 'pause' | 'nex
 interface IUseAudioHelper {
     listSounds: ISoundFile[];
     timeRate?: number; // seconds
+    isLogStatus?: boolean;
 }
 
-export function useAudioHelper(request: IUseAudioHelper) {
+/* Randomize array in-place using Durstenfeld shuffle algorithm */
+function shuffleArray<T>(array: T[]) {
+    for (let i = array.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        let temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+
+    return array;
+}
+
+export function useAudioHelper(request: IUseAudioHelper = {
+    listSounds: [],
+    isLogStatus: false,
+    timeRate: 15,
+}) {
     const [listSounds, setListSounds] = React.useState(request.listSounds);
-    const [timeRate, setTimeRate] = React.useState(request.timeRate || 15); // seconds
+    const [timeRate, setTimeRate] = React.useState(request.timeRate); // seconds
     const [status, setStatus] = React.useState<AudioStatusType>('loading');
+    const [errorMessage, setErrorMessage] = React.useState('');
     
     const [currentTime, setCurrentTime] = React.useState(0);
     React.useEffect(() => {
@@ -34,20 +52,15 @@ export function useAudioHelper(request: IUseAudioHelper) {
     });
 
     const [speed, setSpeed] = React.useState(1);
-    React.useEffect(() => {
-        if (player) {
-            player.setSpeed(speed);
+    function changeSpeed(value: number) {
+        if (player && value > 0 && value <= 2) {
+            player.setSpeed(value);
+            setSpeed(value);
         }
-    }, [speed]);
+    }
 
     const [duration, setDuration] = React.useState(0);
     const [player, setPlayer] = React.useState<SoundPlayer>(null);
-    function playWithPlayer(player: SoundPlayer) {
-        if (player) {
-            player.play(playComplete);
-            setStatus('play');
-        }
-    }
 
     function initialize() {
         setStatus('loading');
@@ -59,12 +72,14 @@ export function useAudioHelper(request: IUseAudioHelper) {
             const callback = (error, player: SoundPlayer) => {
                 if (error) {
                     setStatus('error');
+                    setErrorMessage(error.message);
                 } else {
                     setStatus('success');
+                    setErrorMessage('');
                 }
                 player.setSpeed(speed);
                 setDuration(player.getDuration());
-                playWithPlayer(player);
+                play(player);
             }
 
             const currentAudio = listSounds[index];
@@ -84,14 +99,57 @@ export function useAudioHelper(request: IUseAudioHelper) {
         initialize();
     }, [index]);
 
+    const [isShuffle, setIsShuffle] = React.useState(false);
+    function shuffle() {
+        setIsShuffle(!isShuffle);
+    }
+
+    React.useEffect(() => {
+        if (request.isLogStatus === true) {
+            switch(status) {
+                default: break;
+                case 'loading':
+                    console.log('loading...');
+                    break;
+                case 'next':
+                    console.log('next...');
+                    break;
+                case 'pause':
+                    console.log('pause...');
+                    break;
+                case 'play':
+                    console.log('play...');
+                    break;
+                case 'previous':
+                    console.log('previous...');
+                    break;
+                case 'stop':
+                    console.log('stop...');
+                    break;
+            }
+        }
+    }, [request.isLogStatus, status])
+
     function playComplete(isEnd: boolean) {
         if (isEnd === true) {
-            next();
+            if (isLoop === false) {
+                next();
+            } else {
+                repeat();
+            }
         }
     }
 
-    function play() {
+    function repeat() {
+        setCurrentTime(0);
+        play(player);
+    }
+
+    function play(player: SoundPlayer) {
         if (player) {
+            if (isMuted === true) {
+                changeVolume(player, 0);
+            }
             player.play(playComplete);
             setStatus('play');
         }
@@ -111,12 +169,24 @@ export function useAudioHelper(request: IUseAudioHelper) {
         }
     }
 
+    const [remainingIndices, setRemainingIndices] = React.useState([...Array(request.listSounds.length).keys()].filter(value => value !== index));
+    React.useEffect(() => {
+        setRemainingIndices(remainingIndices.filter(value => value !== index));
+    }, [index]);
+    
     function next() {
-        if (player && index < listSounds.length - 1) {
+        if (player && request.listSounds.length) {
             player.release();
             setCurrentTime(0);
             setStatus('next');
-            setIndex(index + 1);
+            
+            if (isShuffle === true) {
+                let newRemainingIndices = shuffleArray(remainingIndices.length === 0 ? [...Array(request.listSounds.length).keys()].filter(value => value !== index) : remainingIndices);
+                setRemainingIndices(newRemainingIndices);
+                setIndex(newRemainingIndices[0]);
+            } else {
+                setIndex((index + 1) % request.listSounds.length);
+            }
         }
     }
 
@@ -126,6 +196,14 @@ export function useAudioHelper(request: IUseAudioHelper) {
             setCurrentTime(0);
             setStatus('previous');
             setIndex(index - 1);
+
+            if (isShuffle === true) {
+                let newRemainingIndices = shuffleArray(remainingIndices.length === 0 ? [...Array(request.listSounds.length).keys()].filter(value => value !== index) : remainingIndices);
+                setRemainingIndices(newRemainingIndices);
+                setIndex(newRemainingIndices[0]);
+            } else {
+                setIndex(index - 1 >= 0 ? index - 1 : request.listSounds.length - 1);
+            }
         }
     }
 
@@ -157,6 +235,43 @@ export function useAudioHelper(request: IUseAudioHelper) {
         if (player) {
             player.setCurrentTime(seconds);
             setCurrentTime(seconds);
+        }
+    }
+
+    const [isLoop, setIsLoop] = React.useState(false);
+    function loop() {
+        setIsLoop(!isLoop);
+    }
+
+    const [volume, setVolume] = React.useState(100); // percent
+    const [previousVolume, setPreviousVolume] = React.useState(volume);
+    function changeVolume(player: SoundPlayer, volume: number) {
+        if (player && volume >= 0 && volume <= 100) {
+            player.setVolume(volume / 100.0);
+            setVolume(volume);
+        }
+    }
+
+
+    const [isMuted, setIsMuted] = React.useState(false);
+    React.useEffect(() => {
+        if (volume > 0 && isMuted === true) {
+            setIsMuted(false);
+        }
+    }, [volume]);
+
+    function mute() {
+        if (isMuted === false) {
+            setIsMuted(true);
+            setPreviousVolume(volume);
+            changeVolume(player, 0);
+        }
+    }
+
+    function unmute() {
+        if (isMuted === true) {
+            setIsMuted(false);
+            changeVolume(player, previousVolume);
         }
     }
 
@@ -197,16 +312,23 @@ export function useAudioHelper(request: IUseAudioHelper) {
     }
 
     return {
-        status,
-        duration,
-        currentTime,
-        play,
+        play: () => play(player),
         pause,
         stop,
         next,
         previous,
         increaseTime,
         decreaseTime,
+        seekToTime,
+        setSpeed: (speed: number) => changeSpeed(speed),
+        shuffle,
+        loop,
+        mute,
+        unmute,
+        setVolume: (volume: number) => changeVolume(player, volume),
+        status,
+        duration,
+        currentTime,
         durationString: getDurationString(),
         currentTimeString: getCurrentTimeString(),
         currentAudioName: getCurrentAudioName(),
@@ -215,9 +337,12 @@ export function useAudioHelper(request: IUseAudioHelper) {
         isDisabledButtonStop: isDisabledButtonStop(),
         isDisabledButtonNext: isDisabledButtonNext(),
         isDisabledButtonPrevious: isDisabledButtonPrevious(),
-        seekToTime,
         timeRate,
         speed,
-        setSpeed,
+        isShuffle,
+        errorMessage,
+        isLoop,
+        isMuted,
+        volume,
     }
 }

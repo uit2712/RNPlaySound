@@ -12,11 +12,14 @@ import {
     Image,
     StyleSheet,
     Text,
+    ToastAndroid,
     TouchableOpacity,
     View,
 } from 'react-native';
 import SoundPlayer from 'react-native-sound';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
+import EntypoIcon from 'react-native-vector-icons/Entypo';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { useAudioHelper } from './helpers/audio-helper';
 
 const listSpeedValues = [
@@ -38,6 +41,7 @@ function App() {
             { path: 'https://raw.githubusercontent.com/uit2712/RNPlaySound/develop/sounds/Tropic%20-%20Anno%20Domini%20Beats.mp3', name: 'Tropic - Anno Domini Beats', },
         ],
         timeRate: 15,
+        isLogStatus: true,
     });
 
     return (
@@ -52,7 +56,10 @@ function App() {
                     />
                 </TouchableOpacity>
                 <Image source={require('./images/nezuko.png')} style={styles.avatar}/>
-                <TouchableOpacity onPress={player.next} style={styles.button}>
+                <TouchableOpacity
+                    onPress={player.next}
+                    style={styles.button}
+                >
                     <FontAwesomeIcon
                         name='step-forward'
                         size={50}
@@ -61,7 +68,10 @@ function App() {
                 </TouchableOpacity>
             </View>
             <View style={styles.actionButtonsOther}>
-                <TouchableOpacity onPress={player.decreaseTime} style={styles.button}>
+                <TouchableOpacity
+                    onPress={player.decreaseTime}
+                    style={styles.button}
+                >
                     <FontAwesomeIcon
                         name='rotate-left'
                         size={50}
@@ -71,14 +81,20 @@ function App() {
                 </TouchableOpacity>
                 {
                     player.status === 'play' ?
-                        <TouchableOpacity onPress={player.pause} style={{marginHorizontal:20}}>
+                        <TouchableOpacity
+                            onPress={player.pause}
+                            style={{marginHorizontal:20}}
+                        >
                             <FontAwesomeIcon
                                 name='pause'
                                 color='white'
                                 size={50}
                             />
                         </TouchableOpacity> :
-                        <TouchableOpacity onPress={player.play} style={{marginHorizontal:20}}>
+                        <TouchableOpacity
+                            onPress={player.play}
+                            style={{marginHorizontal:20}}
+                        >
                             <FontAwesomeIcon
                                 name='play'
                                 color='white'
@@ -86,7 +102,10 @@ function App() {
                             />
                         </TouchableOpacity>
                 }
-                <TouchableOpacity onPress={player.increaseTime} style={styles.button}>
+                <TouchableOpacity
+                    onPress={player.increaseTime}
+                    style={styles.button}
+                >
                     <FontAwesomeIcon
                         name='rotate-right'
                         size={50}
@@ -94,6 +113,74 @@ function App() {
                     />
                     <Text style={{position:'absolute', alignSelf:'center', marginTop:1, color:'white', fontSize:12}}>{player.timeRate}</Text>
                 </TouchableOpacity>
+            </View>
+            <View style={styles.actionButtonsOther}>
+                <TouchableOpacity
+                    onPress={player.shuffle}
+                    style={styles.button}
+                >
+                    <EntypoIcon
+                        name='shuffle'
+                        color={player.isShuffle === true ? '#3399ff' : 'white'}
+                        size={50}
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    onPress={player.loop}
+                    style={styles.button}
+                >
+                    <MaterialIcon
+                        name='loop'
+                        color={player.isLoop === true ? '#3399ff' : 'white'}
+                        size={50}
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    onPress={player.stop}
+                    style={styles.button}
+                    disabled={player.isDisabledButtonStop}
+                >
+                    <EntypoIcon
+                        name='controller-stop'
+                        color={player.status === 'stop' ? 'red' : 'white'}
+                        size={50}
+                    />
+                </TouchableOpacity>
+                {
+                    player.isMuted === false ? (
+                        <TouchableOpacity
+                            onPress={player.mute}
+                            style={styles.button}
+                        >
+                            <EntypoIcon
+                                name='sound'
+                                color={'white'}
+                                size={50}
+                            />
+                        </TouchableOpacity>
+                    ) : (
+                        <TouchableOpacity
+                            onPress={player.unmute}
+                            style={styles.button}
+                        >
+                            <EntypoIcon
+                                name='sound-mute'
+                                color={'red'}
+                                size={50}
+                            />
+                        </TouchableOpacity>
+                    )
+                }
+                <Slider
+                    style={{width: '40%', height: 50}}
+                    minimumValue={0}
+                    maximumValue={100}
+                    value={player.volume}
+                    minimumTrackTintColor="#FFFFFF"
+                    maximumTrackTintColor="gray"
+                    thumbTintColor='#FFFFFF'
+                    onSlidingComplete={(volume) => player.setVolume(volume)}
+                />
             </View>
             <View style={styles.progressBar}>
                 <Text style={styles.progressBarText}>{player.currentTimeString}</Text>
@@ -105,8 +192,8 @@ function App() {
                     minimumTrackTintColor="#FFFFFF"
                     maximumTrackTintColor="gray"
                     thumbTintColor='#FFFFFF'
-                    onTouchStart={() => player.pause()}
-                    onTouchEnd={() => player.play()}
+                    onTouchStart={player.pause}
+                    onTouchEnd={player.play}
                     onSlidingComplete={(seconds) => player.seekToTime(seconds)}
                 />
                 <Text style={styles.progressBarText}>{player.durationString}</Text>
