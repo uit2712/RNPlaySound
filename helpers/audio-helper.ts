@@ -84,12 +84,6 @@ export function useAudioHelper(request: IUseAudioHelper) {
 
     const [duration, setDuration] = React.useState(0);
     const [player, setPlayer] = React.useState<SoundPlayer>(null);
-    function playWithPlayer(player: SoundPlayer) {
-        if (player) {
-            player.play(playComplete);
-            setStatus('play');
-        }
-    }
 
     function initialize() {
         setStatus('loading');
@@ -108,7 +102,7 @@ export function useAudioHelper(request: IUseAudioHelper) {
                 }
                 player.setSpeed(speed);
                 setDuration(player.getDuration());
-                playWithPlayer(player);
+                play(player);
             }
 
             const currentAudio = listSounds[index];
@@ -171,12 +165,15 @@ export function useAudioHelper(request: IUseAudioHelper) {
 
     function repeat() {
         setCurrentTime(0);
-        play();
+        play(player);
     }
 
-    function play() {
+    function play(player: SoundPlayer) {
         if (player) {
             player.play(playComplete);
+            if (isMuted === true) {
+                changeVolume(player, 0);
+            }
             setStatus('play');
         }
     }
@@ -269,6 +266,33 @@ export function useAudioHelper(request: IUseAudioHelper) {
         setIsLoop(!isLoop);
     }
 
+    const [volume, setVolume] = React.useState(100); // percent
+    function changeVolume(player: SoundPlayer, volume: number, isChangeRealVolume: boolean = false) {
+        if (player && volume >= 0 && volume <= 100) {
+            player.setVolume(volume / 100.0);
+            if (isChangeRealVolume === false) {
+                setVolume(volume);
+            }
+        }
+    }
+
+    const [previousVolume, setPreviousVolume] = React.useState(volume);
+    const [isMuted, setIsMuted] = React.useState(false);
+    function mute() {
+        if (isMuted === false) {
+            setIsMuted(true);
+            setPreviousVolume(volume);
+            changeVolume(player, 0, true);
+        }
+    }
+
+    function unmute() {
+        if (isMuted === true) {
+            setIsMuted(false);
+            changeVolume(player, previousVolume);
+        }
+    }
+
     function formatTimeString(value: number) {
         return new Date(value * 1000).toISOString().substr(11, 8)
     }
@@ -309,7 +333,7 @@ export function useAudioHelper(request: IUseAudioHelper) {
         status,
         duration,
         currentTime,
-        play,
+        play: () => play(player),
         pause,
         stop,
         next,
@@ -333,5 +357,8 @@ export function useAudioHelper(request: IUseAudioHelper) {
         errorMessage,
         loop,
         isLoop,
+        mute,
+        unmute,
+        isMuted,
     }
 }

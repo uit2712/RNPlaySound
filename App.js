@@ -114,6 +114,25 @@ function App() {
                         size={50}
                     />
                 </TouchableOpacity>
+                {
+                    player.isMuted === false ? (
+                        <TouchableOpacity onPress={player.mute} style={styles.button}>
+                            <EntypoIcon
+                                name='sound'
+                                color={'white'}
+                                size={50}
+                            />
+                        </TouchableOpacity>
+                    ) : (
+                        <TouchableOpacity onPress={player.unmute} style={styles.button}>
+                            <EntypoIcon
+                                name='sound-mute'
+                                color={'red'}
+                                size={50}
+                            />
+                        </TouchableOpacity>
+                    )
+                }
             </View>
             <View style={styles.progressBar}>
                 <Text style={styles.progressBarText}>{player.currentTimeString}</Text>
