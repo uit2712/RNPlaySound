@@ -72,14 +72,22 @@ if (currentAudio.isRequired === true) {
 ## Step 1: Install all necessary libraries
 ## Step 2: Create audio-helper
 ### Step 2.1: Create interfaces and types 
-- Create interface __ISoundFile__: used for create a list of sounds we will play
+- Create type __SoundFileType__: used for create a list of sounds we will play
 ```javascript
-interface ISoundFile {
-    path: string | NodeRequire;
-    basePath?: string;
+type SoundFileType = {
+    type: 'app-bundle';
     name: string;
-    isRequired?: boolean;
-}
+    path: string;
+    basePath: string;
+} | {
+    type: 'network';
+    name: string;
+    path: string;
+} | {
+    type: 'directory';
+    name: string;
+    path: NodeRequire;
+};
 ```
 - Create type __AudioStatusType__: when we play sound, there are many states such as: loading, error, play, pause, next, previous,...
 ```javascript
@@ -121,21 +129,32 @@ function initialize() {
         const callback = (error, player: SoundPlayer) => {
             if (error) {
                 setStatus('error');
+                setErrorMessage(error.message);
             } else {
                 setStatus('success');
+                setErrorMessage('');
             }
             player.setSpeed(speed);
             setDuration(player.getDuration());
-            playWithPlayer(player);
+            play(player);
         }
 
         const currentAudio = listSounds[index];
         // If the audio is a 'require' then the second parameter must be the callback.
-        if (currentAudio.isRequired === true) {
-            const newPlayer = new SoundPlayer(currentAudio.path, (error) => callback(error, newPlayer));
-            setPlayer(newPlayer);
-        } else {
-            const newPlayer = new SoundPlayer(currentAudio.path, currentAudio.basePath, (error) => callback(error, newPlayer));
+        let newPlayer: SoundPlayer = null;
+        switch(currentAudio.type) {
+            default: break;
+            case 'app-bundle':
+                newPlayer = new SoundPlayer(currentAudio.path, currentAudio.basePath, (error) => callback(error, newPlayer));
+                break;
+            case 'network':
+                newPlayer = new SoundPlayer(currentAudio.path, null, (error) => callback(error, newPlayer));
+                break;
+            case 'directory':
+                newPlayer = new SoundPlayer(currentAudio.path, (error) => callback(error, newPlayer));
+                break;
+        }
+        if (newPlayer) {
             setPlayer(newPlayer);
         }
     }
@@ -333,12 +352,13 @@ return {
 ```javascript
 const player = useAudioHelper({
     listSounds: [
-        { path: 'blue_dream_cheel.mp3', name: 'Blue Dream - Cheel', basePath: SoundPlayer.MAIN_BUNDLE },
-        { path: 'know_myself_patrick_patrikios.mp3', name: 'Know Myself - Patrick Patrikios', basePath: SoundPlayer.MAIN_BUNDLE },
-        { path: require('./sounds/Play-Doh-meets-Dora_Carmen-Maria-and-Edu-Espinal.mp3'), name: 'Play Doh meets Dora - Carmen Maria and Edu Espinal', isRequired: true, },
-        { path: 'https://raw.githubusercontent.com/uit2712/RNPlaySound/develop/sounds/Tropic%20-%20Anno%20Domini%20Beats.mp3', name: 'Tropic - Anno Domini Beats', },
+        { type: 'app-bundle', path: 'blue_dream_cheel.mp3', name: 'Blue Dream - Cheel', basePath: SoundPlayer.MAIN_BUNDLE },
+        { type: 'app-bundle', path: 'know_myself_patrick_patrikios.mp3', name: 'Know Myself - Patrick Patrikios', basePath: SoundPlayer.MAIN_BUNDLE },
+        { type: 'directory', path: require('./sounds/Play-Doh-meets-Dora_Carmen-Maria-and-Edu-Espinal.mp3'), name: 'Play Doh meets Dora - Carmen Maria and Edu Espinal', },
+        { type: 'network', path: 'https://raw.githubusercontent.com/uit2712/RNPlaySound/develop/sounds/Tropic%20-%20Anno%20Domini%20Beats.mp3', name: 'Tropic - Anno Domini Beats', },
     ],
     timeRate: 15,
+    isLogStatus: true,
 });
 ```
 # References
