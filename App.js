@@ -19,6 +19,7 @@ import {
 import SoundPlayer from 'react-native-sound';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import EntypoIcon from 'react-native-vector-icons/Entypo';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { useAudioHelper } from './helpers/audio-helper';
 
 const listSpeedValues = [
@@ -42,12 +43,6 @@ function App() {
         timeRate: 15,
         isLogStatus: true,
     });
-
-    React.useEffect(() => {
-        if (player.errorMessage) {
-            ToastAndroid.show(player.errorMessage, ToastAndroid.SHORT);
-        }
-    }, [player.errorMessage]);
 
     return (
         <View style={styles.container}>
@@ -109,6 +104,13 @@ function App() {
                     <EntypoIcon
                         name='shuffle'
                         color={player.isShuffle === true ? '#3399ff' : 'white'}
+                        size={50}
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={player.loop} style={styles.button}>
+                    <MaterialIcon
+                        name='loop'
+                        color={player.isLoop === true ? '#3399ff' : 'white'}
                         size={50}
                     />
                 </TouchableOpacity>

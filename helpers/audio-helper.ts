@@ -161,8 +161,17 @@ export function useAudioHelper(request: IUseAudioHelper) {
 
     function playComplete(isEnd: boolean) {
         if (isEnd === true) {
-            next();
+            if (isLoop === false) {
+                next();
+            } else {
+                repeat();
+            }
         }
+    }
+
+    function repeat() {
+        setCurrentTime(0);
+        play();
     }
 
     function play() {
@@ -202,7 +211,6 @@ export function useAudioHelper(request: IUseAudioHelper) {
                 setRemainingIndices(newRemainingIndices);
                 setIndex(newRemainingIndices[0]);
             } else {
-                console.log('nextIndex: ', (index + 1) % request.listSounds.length);
                 setIndex((index + 1) % request.listSounds.length);
             }
         }
@@ -214,6 +222,14 @@ export function useAudioHelper(request: IUseAudioHelper) {
             setCurrentTime(0);
             setStatus('previous');
             setIndex(index - 1);
+
+            if (isShuffle === true) {
+                let newRemainingIndices = shuffleArray(remainingIndices.length === 0 ? [...Array(request.listSounds.length).keys()].filter(value => value !== index) : remainingIndices);
+                setRemainingIndices(newRemainingIndices);
+                setIndex(newRemainingIndices[0]);
+            } else {
+                setIndex(index - 1 >= 0 ? index - 1 : request.listSounds.length - 1);
+            }
         }
     }
 
@@ -246,6 +262,11 @@ export function useAudioHelper(request: IUseAudioHelper) {
             player.setCurrentTime(seconds);
             setCurrentTime(seconds);
         }
+    }
+
+    const [isLoop, setIsLoop] = React.useState(false);
+    function loop() {
+        setIsLoop(!isLoop);
     }
 
     function formatTimeString(value: number) {
@@ -310,5 +331,7 @@ export function useAudioHelper(request: IUseAudioHelper) {
         shuffle,
         isShuffle,
         errorMessage,
+        loop,
+        isLoop,
     }
 }
